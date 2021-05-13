@@ -4,6 +4,8 @@ require("dotenv").config(); //allows us to use enviromentatl variable in .env
 
 const { PORT } = process.env;
 
+const userRoute = require('./routes/user.js')
+
 const app = express();
 
 connectDB();
@@ -14,6 +16,8 @@ connectDB();
  */
 // initialise express middleware
 app.use(express.json({ extended: false }));
+
+app.use(userRoute)
 
 // Basic Route - home
 app.get("/", (req, res) => {
