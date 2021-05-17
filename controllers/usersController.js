@@ -2,6 +2,7 @@ const User = require("../models/User");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 require("dotenv").config();
 const { SECRET } = process.env;
 
@@ -42,20 +43,21 @@ exports.loginUser = async (req, res) => {
   try {
     // initialise user
     let user = await User.findOne({ email: email });
-
-    if (!user)
-      return res
+    console.log(user)
+    if (!user){
+      res
         .status(400)
         .json({ statusCode: 400, message: "Invalid credentials" });
-
+    }
     //  else..123
     //  check the password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({
+    if (!isMatch){
+      res.status(400).json({
         statusCode: 400,
         message: "invalid credentials",
       });
+    }
     //   else
     // there's a match, send token
     // send playload, and signed token
@@ -71,7 +73,8 @@ exports.loginUser = async (req, res) => {
         expiresIn: 360000,
       },
       (err, token) => {
-        if (err) throw err;
+        if (err) {throw err}
+        console.log(token)
         res.json({
           statusCode: 200,
           message: "Login in successfully",
@@ -94,27 +97,63 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-exports.registerUser = async (req, res, next) => {
-     bcrypt.hash(req.body.password, 10, (err, hash) =>{
-       if(err){
-           return res.status(500).json({
-               error:err
-           });
-       }else {
-
-    const user = new User({
-   _id: new mongoose.Schema.Types.ObjectId,
-   firstname = req.body.firstName,
-   lastname: req.body.lastName,
-   email: req.body.email,
-   password: hash,
-   userRole: req.body.userRole,
-   isTutor: req.body.isTutor,
-   isAdmin: req.body.isAdmin,
-   });
-   user.save();
-
-    }
- });
-
+exports.register = async (req, res, next) => {
+  User.find({ email: req.body.email })
+    .exec()
+    .then((user) => {
+      if (user.length >= 1) {
+        return res.status(409).json({ message: "Mail exists" });
+      } else {
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+          if (err) {
+            return res.status(500).json({
+              error: err,
+            });
+          } else {
+            const user = new User({
+              // _id: new mongoose.Schema.Types.ObjectId(),
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              email: req.body.email,
+              // role: req.body.userRole,
+              // tutor: req.body.isTutor,
+              // admin: req.body.isAdmin,
+              password: hash,
+            })
+            user
+              .save()
+              .then((result) => {
+                console.log(result);
+                res.status(201).json({
+                  message: "user created",
+                });
+              })
+              .catch((err) => {
+                console.log(err);
+                res.status(500).json({
+                  error: err,
+                });
+              });
+          }
+        });
+      }
+    });
 };
+
+exports.deleteUser = async (req, res, next) => {
+  User.remove({_id: req.params.userId})
+  .exec()
+  .then(result =>{
+    res.status(200)
+    .json({
+      message: 'User deleted'
+    });
+  })
+  .catch(err =>  {
+    console.log(err);
+    res.status(500)
+    .json({
+      error: err
+    });
+  });
+}

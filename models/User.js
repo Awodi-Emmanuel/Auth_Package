@@ -6,7 +6,7 @@ const UserSchema = mongoose.Schema(
   {
     // define the properties of
     // the application
-    _id: mongoose.Schema.Types.ObjectId,
+    // _id: mongoose.Schema.Types.ObjectId,
 
     firstName: {
       type: String,
@@ -23,6 +23,7 @@ const UserSchema = mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
     },
     userRole: {
       type: String,

@@ -6,14 +6,16 @@ const auth = require("../middleware/auth");
 // import the router controller
 const usersController = require("../controllers/usersController");
 
-const { loginUser, registerUser, getLoggedInUser } = usersController;
+const { loginUser, register, getLoggedInUser, deleteUser } = usersController;
 
 // Login user route
 router.post("/api/auth/login", loginUser);
 
-router.post("/signup", registerUser);
+router.post("/signup", register);
 
 // Get logged in user
 router.get("/api/auth", auth, getLoggedInUser);
+
+router.delete('/:userId', deleteUser);
 
 module.exports = router;
