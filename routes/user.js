@@ -9,7 +9,13 @@ const usersController = require("../controllers/usersController");
 const { loginUser, register, getLoggedInUser, deleteUser } = usersController;
 
 // Login user route
-router.post("/api/auth/login", loginUser);
+router.post(
+  "/api/auth/login",
+  [check("email", "Please enter a valid email").isEmail(),
+  check("password", "A valid password is required").exists(),
+],
+  loginUser
+);
 
 router.post("/signup", register);
 

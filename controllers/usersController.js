@@ -22,7 +22,6 @@ exports.getLoggedInUser = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error!");
-    ``;
   }
 };
 
@@ -32,7 +31,9 @@ exports.getLoggedInUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({
+      errors: errors.array(),
+    });
 
   // else
   // destructure request body
@@ -42,17 +43,18 @@ exports.loginUser = async (req, res) => {
 
   try {
     // initialise user
-    let user = await User.findOne({ email: email });
-    console.log(user)
-    if (!user){
-      res
-        .status(400)
-        .json({ statusCode: 400, message: "Invalid credentials" });
+    let user = await User.findOne({ email: emailc });
+    console.log(user);
+    if (!user) {
+      res.status(400).json({
+        statusCode: 400,
+        message: "Invalid credentials",
+      });
     }
     //  else..123
     //  check the password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch){
+    if (!isMatch) {
       res.status(400).json({
         statusCode: 400,
         message: "invalid credentials",
@@ -73,8 +75,10 @@ exports.loginUser = async (req, res) => {
         expiresIn: 360000,
       },
       (err, token) => {
-        if (err) {throw err}
-        console.log(token)
+        if (err) {
+          throw err;
+        }
+        console.log(token);
         res.json({
           statusCode: 200,
           message: "Login in successfully",
@@ -84,8 +88,7 @@ exports.loginUser = async (req, res) => {
             email: user.email,
             userRole: user.Role,
             isTutor: user.isTutor,
-            isAdmin: user,
-            isAdmin,
+            isAdmin: user.isAdmin,
           },
           token,
         });
@@ -119,7 +122,7 @@ exports.register = async (req, res, next) => {
               // tutor: req.body.isTutor,
               // admin: req.body.isAdmin,
               password: hash,
-            })
+            });
             user
               .save()
               .then((result) => {
@@ -141,19 +144,17 @@ exports.register = async (req, res, next) => {
 };
 
 exports.deleteUser = async (req, res, next) => {
-  User.remove({_id: req.params.userId})
-  .exec()
-  .then(result =>{
-    res.status(200)
-    .json({
-      message: 'User deleted'
+  User.remove({ _id: req.params.userId })
+    .exec()
+    .then((result) => {
+      res.status(200).json({
+        message: "User deleted",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        error: err,
+      });
     });
-  })
-  .catch(err =>  {
-    console.log(err);
-    res.status(500)
-    .json({
-      error: err
-    });
-  });
-}
+};
